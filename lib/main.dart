@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zymohome/Home_Screen.dart';
+import 'package:zymohome/screens/Home_Screen.dart';
 
 void main() {
   runApp(const MyApp());

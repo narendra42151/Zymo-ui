@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:zymohome/Booking_widget.dart';
-import 'package:zymohome/home_Screen_widgets.dart';
-import 'package:zymohome/socila_media_link.dart';
+import 'package:zymohome/widgets/Booking_widget.dart';
+import 'package:zymohome/widgets/add_drawer.dart';
+import 'package:zymohome/widgets/home_Screen_widgets.dart';
+import 'package:zymohome/widgets/socila_media_link.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,10 +16,9 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.grey[900],
         centerTitle: true,
         title: Image.asset('assets/zymoo.png', height: 55),
-        leading:
-            // Adjust left padding
-            Icon(Icons.menu, color: Colors.white, size: 30),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
+      drawer: AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
