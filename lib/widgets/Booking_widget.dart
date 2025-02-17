@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zymohome/widgets/carlist.dart';
 
 class BookingWidget extends StatefulWidget {
   const BookingWidget({Key? key}) : super(key: key);
@@ -206,7 +207,10 @@ class _BookingWidgetState extends State<BookingWidget> {
             minimumSize: const Size(340, 0),
           ),
           onPressed: () {
-            // Handle search action
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
           },
           child: Text("Search", style: TextStyle(fontSize: 18, color: black)),
         ),
@@ -255,7 +259,10 @@ class _BookingWidgetState extends State<BookingWidget> {
             minimumSize: const Size(340, 0),
           ),
           onPressed: () {
-            // Handle search action
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
           },
           child: Text("Search", style: TextStyle(fontSize: 18, color: black)),
         ),
