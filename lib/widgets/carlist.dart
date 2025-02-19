@@ -760,52 +760,66 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _showTransmissionFilter() async {
-    Set<String> tempSelections = Set.from(selectedTransmissions);
+  String selectedTransmissionText = 'Transmission';
+  String selectedPriceRangeText = 'Price Range';
+  String selectedSeatsText = 'Seats';
+  String selectedFuelTypeText = 'Fuel Type';
 
-    await showDialog(
+  void _showAllCars() {
+    setState(() {
+      // Reset all filters
+      selectedTransmissions.clear();
+      selectedFuelTypes.clear();
+      seatRange = const RangeValues(3, 8);
+      priceSort = 'lowToHigh';
+      selectedPriceSort = 'Low to High';
+
+      // Reset filter texts
+      selectedTransmissionText = 'Transmission';
+      selectedPriceRangeText = 'Price Range';
+      selectedSeatsText = 'Seats';
+      selectedFuelTypeText = 'Fuel Type';
+
+      // Show all cars
+      filteredCars = allCars;
+    });
+  }
+
+  void _showTransmissionFilter() async {
+    final List<String> transmissionOptions = ['Manual', 'Automatic', 'Hybrid'];
+
+    String? result = await showDialog<String>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Select Transmission'),
-              content: SingleChildScrollView(
-                child: Column(
-                  children:
-                      ['Manual', 'Automatic', 'Hybrid'].map((transmission) {
-                    return CheckboxListTile(
-                      title: Text(transmission),
-                      value: tempSelections.contains(transmission),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value!) {
-                            tempSelections.add(transmission);
-                          } else {
-                            tempSelections.remove(transmission);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      selectedTransmissions = tempSelections;
-                    });
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Transmission'),
+          content: Container(
+            width: double.minPositive,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: transmissionOptions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(transmissionOptions[index]),
+                  onTap: () {
+                    Navigator.of(context).pop(transmissionOptions[index]);
                   },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
+                );
+              },
+            ),
+          ),
         );
       },
     );
+
+    if (result != null) {
+      setState(() {
+        selectedTransmissionText = result;
+        selectedTransmissions.clear();
+        selectedTransmissions.add(result);
+        //  applyFilters();
+      });
+    }
   }
 
   void _showPriceSortFilter() async {
@@ -865,84 +879,75 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showSeatFilter() async {
-    await showDialog(
+    final List<int> seatOptions = [3, 4, 5, 6, 7, 8];
+
+    int? result = await showDialog<int>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select Seat Range'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RangeSlider(
-              values: seatRange,
-              min: 3,
-              max: 8,
-              divisions: 5,
-              labels: RangeLabels(
-                seatRange.start.toInt().toString(),
-                seatRange.end.toInt().toString(),
-              ),
-              onChanged: (values) {
-                setState(() => seatRange = values);
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Seats'),
+          content: Container(
+            width: double.minPositive,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: seatOptions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text('${seatOptions[index]} Seats'),
+                  onTap: () {
+                    Navigator.of(context).pop(seatOptions[index]);
+                  },
+                );
               },
             ),
-            Text('${seatRange.start.toInt()} - ${seatRange.end.toInt()} Seats'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
           ),
-        ],
-      ),
-    );
-  }
-
-  void _showFuelTypeFilter() async {
-    Set<String> tempSelections = Set.from(selectedFuelTypes);
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Select Fuel Type'),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: ['Petrol', 'Diesel', 'Electric'].map((fuel) {
-                    return CheckboxListTile(
-                      title: Text(fuel),
-                      value: tempSelections.contains(fuel),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value!) {
-                            tempSelections.add(fuel);
-                          } else {
-                            tempSelections.remove(fuel);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      selectedFuelTypes = tempSelections;
-                    });
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
         );
       },
     );
+    if (result != null) {
+      setState(() {
+        selectedSeatsText = '$result Seats';
+        seatRange = RangeValues(result.toDouble(), result.toDouble());
+        //  applyFilters();
+      });
+    }
+  }
+
+  void _showFuelTypeFilter() async {
+    final List<String> fuelOptions = ['Petrol', 'Diesel', 'Electric'];
+
+    String? result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Fuel Type'),
+          content: Container(
+            width: double.minPositive,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: fuelOptions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(fuelOptions[index]),
+                  onTap: () {
+                    Navigator.of(context).pop(fuelOptions[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        selectedFuelTypeText = result;
+        selectedFuelTypes.clear();
+        selectedFuelTypes.add(result);
+        applyFilters();
+      });
+    }
   }
 
   void _resetFilters() {
@@ -952,6 +957,13 @@ class _HomePageState extends State<HomePage> {
       seatRange = const RangeValues(3, 8);
       priceSort = 'lowToHigh';
       selectedPriceSort = 'Low to High';
+
+      // Reset button texts
+      selectedTransmissionText = 'Transmission';
+      selectedPriceRangeText = 'Price Range';
+      selectedSeatsText = 'Seats';
+      selectedFuelTypeText = 'Fuel Type';
+
       applyFilters();
     });
   }
@@ -1014,20 +1026,23 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'All',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
+                    GestureDetector(
+                      onTap: _showAllCars,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'All',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
                         ),
                       ),
                     ),
@@ -1054,45 +1069,118 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey[800],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    'Transmission',
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isExpanded: false,
+                                    value: selectedTransmissionText ==
+                                            'Transmission'
+                                        ? null
+                                        : selectedTransmissionText,
+                                    hint: Text(
+                                      'Transmission',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 17),
+                                    ),
+                                    icon: Icon(Icons.arrow_drop_down,
+                                        color: Colors.white),
+                                    dropdownColor: Colors.grey[800],
                                     style: TextStyle(color: Colors.white),
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        if (newValue != null) {
+                                          selectedTransmissionText = newValue;
+                                          selectedTransmissions.clear();
+                                          selectedTransmissions.add(newValue);
+                                          applyFilters();
+                                        }
+                                      });
+                                    },
+                                    items: ['Manual', 'Automatic', 'Hybrid']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          '  $value',
+                                          style: TextStyle(fontSize: 17),
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
-                                Icon(Icons.arrow_drop_down,
-                                    color: Colors.white),
-                              ],
+                              ),
                             ),
                           ),
                         ),
+                        // ...existing code...
                         GestureDetector(
-                          onTap: _showPriceSortFilter,
+                          onTap:
+                              () {}, // No tap needed since we're handling dropdown changes directly
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.grey[800],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    'Price Range',
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isExpanded: false,
+                                    value:
+                                        selectedPriceRangeText == 'Price Range'
+                                            ? null
+                                            : selectedPriceRangeText,
+                                    hint: Text(
+                                      'Price Range',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 17),
+                                    ),
+                                    icon: Icon(Icons.arrow_drop_down,
+                                        color: Colors.white),
+                                    dropdownColor: Colors.grey[800],
                                     style: TextStyle(color: Colors.white),
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        if (newValue != null) {
+                                          selectedPriceRangeText = newValue;
+                                          // Adjust logic to handle the selected price sort here
+                                          if (newValue == 'Low to High') {
+                                            priceSort = 'lowToHigh';
+                                          } else {
+                                            priceSort = 'highToLow';
+                                          }
+                                          applyFilters();
+                                        }
+                                      });
+                                    },
+                                    items: ['Low to High', 'High to Low']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          '  $value',
+                                          style: TextStyle(fontSize: 17),
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
-                                Icon(Icons.arrow_drop_down,
-                                    color: Colors.white),
-                              ],
+                              ),
                             ),
                           ),
                         ),
+
                         GestureDetector(
                           onTap: _showSeatFilter,
                           child: Container(
@@ -1100,19 +1188,52 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey[800],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    'Seats',
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: SizedBox(
+                                // Add this SizedBox
+                                // Set fixed width
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    isExpanded: false,
+                                    hint: Text(
+                                      'Seats',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 17),
+                                    ),
+                                    value: seatRange.start.toInt() ==
+                                            seatRange.end.toInt()
+                                        ? seatRange.start.toInt()
+                                        : null,
+                                    icon: Icon(Icons.arrow_drop_down,
+                                        color: Colors.white),
+                                    dropdownColor: Colors.grey[800],
                                     style: TextStyle(color: Colors.white),
+                                    onChanged: (int? newValue) {
+                                      setState(() {
+                                        if (newValue != null) {
+                                          seatRange = RangeValues(
+                                              newValue.toDouble(),
+                                              newValue.toDouble());
+                                        }
+                                      });
+                                    },
+                                    items: List<int>.generate(
+                                            6, (index) => index + 3)
+                                        .map<DropdownMenuItem<int>>(
+                                            (int value) {
+                                      return DropdownMenuItem<int>(
+                                        value: value,
+                                        child: Text(
+                                          '  $value Seats',
+                                          style: TextStyle(fontSize: 17),
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
-                                Icon(Icons.arrow_drop_down,
-                                    color: Colors.white),
-                              ],
+                              ),
                             ),
                           ),
                         ),
@@ -1123,20 +1244,52 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey[800],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    'Fuel Type',
-                                    style: TextStyle(color: Colors.white),
+                            child: SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: false,
+                                  value: selectedFuelTypeText == 'Fuel Type'
+                                      ? null
+                                      : selectedFuelTypeText,
+                                  hint: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Fuel Type',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 17),
+                                    ),
                                   ),
+                                  icon: Icon(Icons.arrow_drop_down,
+                                      color: Colors.white),
+                                  dropdownColor: Colors.grey[800],
+                                  style: TextStyle(color: Colors.white),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      if (newValue != null) {
+                                        selectedFuelTypeText = newValue;
+                                        selectedFuelTypes.clear();
+                                        selectedFuelTypes.add(newValue);
+                                        applyFilters();
+                                      }
+                                    });
+                                  },
+                                  items: ['Petrol', 'Diesel', 'Electric']
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        '  $value',
+                                        style: TextStyle(fontSize: 17),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
-                                Icon(Icons.arrow_drop_down,
-                                    color: Colors.white),
-                              ],
+                              ),
                             ),
+// ...existing code...
                           ),
                         ),
                         GestureDetector(
